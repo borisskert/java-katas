@@ -140,11 +140,4 @@ public class MysteryFunctionTest {
     public void mysteryInvOf26() throws Exception {
         assertEquals("mysteryInv(26)", 19, MysteryFunction.mysteryInv(26));
     }
-
-//    @Test
-//    public void lengthOf() throws Exception {
-//        assertEquals("lengthOf(26)", 63L, MysteryFunction.lengthOf(8917775615655940791L));
-//    }
-
-
 }

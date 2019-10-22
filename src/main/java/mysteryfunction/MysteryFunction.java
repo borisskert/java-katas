@@ -20,9 +20,7 @@ public class MysteryFunction {
             result = result.add(TWO.pow(bits - 1));
         }
 
-        if(lookupIndex.equals(BigInteger.ONE)) {
-            result = result.add(BigInteger.ONE);
-        }
+        result = result.add(lookupIndex.mod(TWO));
 
         return result.longValue();
     }
@@ -33,7 +31,8 @@ public class MysteryFunction {
         BigInteger previous = BigInteger.valueOf(number);
 
         while(previous.compareTo(BigInteger.ZERO) > 0) {
-            index = index.add(maxIndex(previous).multiply(factor));
+            BigInteger maxIndex = maxIndex(previous);
+            index = index.add(maxIndex.multiply(factor));
 
             int bits = previous.bitLength();
             BigInteger size = TWO.pow(bits);
