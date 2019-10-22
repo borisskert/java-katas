@@ -14,14 +14,14 @@ public class MysteryFunction {
         BigInteger result = BigInteger.ZERO;
 
         do {
-            int bits = lengthOf(lookupIndex);
-            BigInteger size = pow(TWO, bits);
+            int bits = lookupIndex.bitLength();
+            BigInteger size = TWO.pow(bits);
             BigInteger offset = size.shiftRight(1);
             BigInteger maxIndex = offset.subtract(BigInteger.ONE);
             BigInteger offsetIndex = lookupIndex.mod(offset);
 
             lookupIndex = maxIndex.subtract(offsetIndex);
-            result = result.add(pow(TWO, (bits - 1)));
+            result = result.add(TWO.pow(bits - 1));
 
         } while(lookupIndex.compareTo(BigInteger.ONE) > 0);
 
@@ -32,10 +32,6 @@ public class MysteryFunction {
         return result.longValue();
     }
 
-    private static BigInteger pow(BigInteger base, int exp) {
-        return base.pow(exp);
-    }
-
     public static long mysteryInv(long number) {
         BigInteger index = BigInteger.ZERO;
         BigInteger factor = BigInteger.ONE;
@@ -44,8 +40,8 @@ public class MysteryFunction {
         while(previous.compareTo(BigInteger.ZERO) > 0) {
             index = index.add(maxIndex(previous).multiply(factor));
 
-            int bits = lengthOf(previous);
-            BigInteger size = pow(TWO, bits);
+            int bits = previous.bitLength();
+            BigInteger size = TWO.pow(bits);
 
             BigInteger previousSize = size.shiftRight(1);
 
@@ -57,14 +53,10 @@ public class MysteryFunction {
     }
 
     private static BigInteger maxIndex(BigInteger number) {
-        int bits = lengthOf(number);
-        BigInteger size = pow(TWO, bits);
+        int bits = number.bitLength();
+        BigInteger size = TWO.pow(bits);
 
         return size.subtract(BigInteger.ONE);
-    }
-
-    public static int lengthOf(BigInteger number) {
-        return number.bitLength();
     }
 
     public static String nameOfMystery() {
