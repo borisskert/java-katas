@@ -6,14 +6,10 @@ public class MysteryFunction {
     private static final BigInteger TWO = BigInteger.valueOf(2L);
 
     public static long mystery(long index) {
-        if(index == 0L) {
-            return 0L;
-        }
-
         BigInteger lookupIndex = BigInteger.valueOf(index);
         BigInteger result = BigInteger.ZERO;
 
-        do {
+        while(lookupIndex.compareTo(BigInteger.ONE) > 0) {
             int bits = lookupIndex.bitLength();
             BigInteger size = TWO.pow(bits);
             BigInteger offset = size.shiftRight(1);
@@ -22,8 +18,7 @@ public class MysteryFunction {
 
             lookupIndex = maxIndex.subtract(offsetIndex);
             result = result.add(TWO.pow(bits - 1));
-
-        } while(lookupIndex.compareTo(BigInteger.ONE) > 0);
+        }
 
         if(lookupIndex.equals(BigInteger.ONE)) {
             result = result.add(BigInteger.ONE);
