@@ -1,10 +1,26 @@
 package interlacedspiralcipher;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class InterlacedSpiralCipher {
 
     public static String encode(String s) {
-        int cipherLength = length(s);
-        char[] spiral = new char[cipherLength];
+        Map<Integer, Integer> map = createMap(s.length());
+
+        char[] result = new char[map.size()];
+
+        for(int index = 0; index < s.length(); index++) {
+            Integer cipherIndex = map.get(index);
+            result[index] = s.charAt(cipherIndex);
+        }
+
+        return String.valueOf(result);
+    }
+
+    private static Map<Integer, Integer> createMap(int textLength) {
+        int cipherLength = length(textLength);
+        int[] spiral = new int[cipherLength];
 
         int ring = (int)Math.min(1, Math.sqrt(cipherLength) - 2);
         int round = 0;
@@ -13,9 +29,7 @@ public class InterlacedSpiralCipher {
         int index = 0;
         int size = 2 * ring + 1;
 
-        for(; index < s.length(); index++) {
-            char c = s.charAt(index);
-
+        for(; index < textLength; index++) {
             if(round >= 4) {
                 round = 0;
                 step++;
@@ -29,7 +43,7 @@ public class InterlacedSpiralCipher {
             }
 
             int position = offset + step + size * round;
-            spiral[position] = c;
+            spiral[position] = index;
 
             round++;
         }
@@ -38,12 +52,12 @@ public class InterlacedSpiralCipher {
             spiral[index] = ' ';
         }
 
-        Snail snail = new Snail(s.length());
+        Snail snail = new Snail(textLength);
         for(index = 0; index < spiral.length; index++) {
             snail.setNext(spiral[index]);
         }
 
-        return snail.toString();
+        return snail.getMap();
     }
 
     public static String decode(String s) {
@@ -51,8 +65,7 @@ public class InterlacedSpiralCipher {
         return "";
     }
 
-    private static int length(String s) {
-        int textLength = s.length();
+    private static int length(int textLength) {
         int squareRoot = (int)Math.sqrt(textLength);
         int power = squareRoot * squareRoot;
 
@@ -63,8 +76,8 @@ public class InterlacedSpiralCipher {
         return power;
     }
 
-    private static class Snail {
-        private final char[][] values;
+    private static class Snail<T> {
+        private final T[][] values;
         private Direction direction = Direction.E;
 
         private final int size;
@@ -88,7 +101,7 @@ public class InterlacedSpiralCipher {
             this.maxY = this.size;
         }
 
-        public void setNext(char c) {
+        public void setNext(T c) {
             values[x][y] = c;
             move();
         }
@@ -149,12 +162,12 @@ public class InterlacedSpiralCipher {
             N, S, E, W
         }
 
-        private char[][] create(int size) {
+        private T[][] create(int size) {
             int length = length(size);
-            char[][] values = new char[length][];
+            T[][] values = (T[][])new Object[length][];
 
             for(int i = 0; i < length; i++) {
-                values[i] = new char[length];
+                values[i] = (T[])new Object[length];
             }
 
             return values;
@@ -171,17 +184,21 @@ public class InterlacedSpiralCipher {
             return squareRoot;
         }
 
-        @Override
-        public String toString() {
-            StringBuilder builder = new StringBuilder();
+        public Map<Integer, T> getMap() {
+            Map<Integer, T> map = new HashMap<>();
 
+            int index = 0;
             for(int x = 0; x < values.length; x++) {
                 for(int y = 0; y < values[x].length; y++) {
-                    builder.append(values[x][y]);
+
+                    T object = values[x][y];
+                    map.put(index, object);
+
+                    index++;
                 }
             }
 
-            return builder.toString();
+            return map;
         }
     }
 }
