@@ -3,6 +3,9 @@ package interlacedspiralcipher;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * https://www.codewars.com/kata/interlaced-spiral-cipher/java
+ */
 public class InterlacedSpiralCipher {
 
     public static String encode(String s) {
@@ -13,7 +16,7 @@ public class InterlacedSpiralCipher {
         for (int index = 0; index < map.size(); index++) {
             Integer encodeIndex = map.getForward(index);
 
-            if(encodeIndex >= s.length()) {
+            if (encodeIndex >= s.length()) {
                 result[index] = ' ';
             } else {
                 result[index] = s.charAt(encodeIndex);
@@ -33,7 +36,17 @@ public class InterlacedSpiralCipher {
             result[index] = s.charAt(decodeIndex);
         }
 
-        return String.valueOf(result).trim();
+        return rightTrim(String.valueOf(result));
+    }
+
+    private static String rightTrim(String s) {
+        int i = s.length() - 1;
+
+        while (i >= 0 && Character.isWhitespace(s.charAt(i))) {
+            i--;
+        }
+
+        return s.substring(0, i + 1);
     }
 
     private static TwoWayHashMap<Integer, Integer> createSpiralCipherMap(int textLength) {
@@ -44,7 +57,7 @@ public class InterlacedSpiralCipher {
         int offset = 0;
         int step = 0;
         int index = 0;
-        int size = (int)Math.sqrt(cipherLength) - 1;
+        int size = (int) Math.sqrt(cipherLength) - 1;
 
         for (; index < cipherLength; index++) {
             if (round >= 4) {
@@ -83,6 +96,9 @@ public class InterlacedSpiralCipher {
         return power;
     }
 
+    /**
+     * Snail to navigate through the 2-dim array
+     */
     private static class Snail<T> {
         private final T[][] values;
         private Direction direction = Direction.E;
@@ -207,6 +223,9 @@ public class InterlacedSpiralCipher {
         }
     }
 
+    /**
+     * Two-way map to get value for key and key for value
+     */
     public static class TwoWayHashMap<K extends Object, V extends Object> {
 
         private Map<K, V> forward = new HashMap<>();
