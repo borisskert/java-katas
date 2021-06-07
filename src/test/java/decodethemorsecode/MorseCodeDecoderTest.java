@@ -3,7 +3,7 @@ package decodethemorsecode;
 import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class MorseCodeDecoderTest {
     @Test
@@ -13,8 +13,8 @@ public class MorseCodeDecoderTest {
 
     @Test
     public void testAnotherCodes() {
-//        assertThat(MorseCodeDecoder.decode("...---..."), is("SOS"));
-//        assertThat(MorseCodeDecoder.decode("   .   . "), is("E E"));
+        assertThat(MorseCodeDecoder.decode("...---..."), is("SOS"));
+        assertThat(MorseCodeDecoder.decode("   .   . "), is("E E"));
         assertThat(
                 MorseCodeDecoder.decode(
                 "      ...---... -.-.--   - .... .   --.- ..- .. -.-. -.-   -... .-. --- .-- -.   ..-. --- -..-   .--- ..- -- .--. ...   --- ...- . .-.   - .... .   .-.. .- --.. -.--   -.. --- --. .-.-.-  "

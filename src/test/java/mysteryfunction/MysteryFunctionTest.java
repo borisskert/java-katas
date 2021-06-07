@@ -2,7 +2,7 @@ package mysteryfunction;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class MysteryFunctionTest {
 
@@ -64,13 +64,8 @@ public class MysteryFunctionTest {
     @Test
     public void mysteryOfAll() throws Exception {
         for(long i = 1L; i <= 2048L * 16L; i++) {
-            System.out.print("mystery(" + i + ") -> ");
             long mystery = MysteryFunction.mystery(i);
-            System.out.println(mystery);
-
-            System.out.print("mysteryInv(" + mystery + ") -> ");
             long mysteryInv = MysteryFunction.mysteryInv(mystery);
-            System.out.println(mysteryInv);
 
             assertEquals("mystery(mystery(" + i + ")) -> " + i, mysteryInv, i);
         }

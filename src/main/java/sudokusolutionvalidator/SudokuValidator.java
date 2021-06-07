@@ -22,6 +22,7 @@ public class SudokuValidator {
         ).noneMatch(HAS_DUPLICATES.or(IS_NOT_FILLED));
     }
 
+    @SafeVarargs
     private static <T> Stream<T> concat(Stream<T>... streams) {
         Stream<T> concatenated = Stream.empty();
 

@@ -77,7 +77,7 @@ public class InterlacedSpiralCipher {
             round++;
         }
 
-        Snail snail = new Snail(textLength);
+        Snail<Integer> snail = new Snail<>(textLength);
         for (index = 0; index < spiral.length; index++) {
             snail.setNext(spiral[index]);
         }
@@ -183,6 +183,7 @@ public class InterlacedSpiralCipher {
             N, S, E, W
         }
 
+        @SuppressWarnings("unchecked")
         private T[][] create(int size) {
             int length = snailSize(size);
             T[][] values = (T[][]) new Object[length][];
@@ -209,10 +210,9 @@ public class InterlacedSpiralCipher {
             TwoWayHashMap<Integer, T> map = new TwoWayHashMap<>();
 
             int index = 0;
-            for (int x = 0; x < values.length; x++) {
-                for (int y = 0; y < values[x].length; y++) {
+            for (T[] value : values) {
+                for (T object : value) {
 
-                    T object = values[x][y];
                     map.add(index, object);
 
                     index++;
@@ -226,10 +226,10 @@ public class InterlacedSpiralCipher {
     /**
      * Two-way map to get value for key and key for value
      */
-    public static class TwoWayHashMap<K extends Object, V extends Object> {
+    public static class TwoWayHashMap<K, V> {
 
-        private Map<K, V> forward = new HashMap<>();
-        private Map<V, K> backward = new HashMap<>();
+        private final Map<K, V> forward = new HashMap<>();
+        private final Map<V, K> backward = new HashMap<>();
 
         public synchronized void add(K key, V value) {
             forward.put(key, value);

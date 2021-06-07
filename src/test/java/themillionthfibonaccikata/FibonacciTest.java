@@ -1,5 +1,6 @@
 package themillionthfibonaccikata;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigInteger;
@@ -74,6 +75,7 @@ public class FibonacciTest {
     }
 
     @Test
+    @Ignore("Just printing out an huge number")
     public void testHugeFib() {
         System.out.println(Fibonacci.fib(new BigInteger("2000000")));
     }
