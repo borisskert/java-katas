@@ -3,7 +3,6 @@ package fourbyfourskyscrapers;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 
 public class SolutionTest {
 
@@ -31,12 +30,12 @@ public class SolutionTest {
 
     @Test
     public void testSolvePuzzle1() {
-        assertEquals(SkyScrapers.solvePuzzle(clues[0]), outcomes[0]);
+        assertThat(SkyScrapers.solvePuzzle(clues[0])).isEqualTo(outcomes[0]);
     }
 
     @Test
     public void testSolvePuzzle2() {
-        assertEquals(SkyScrapers.solvePuzzle(clues[1]), outcomes[1]);
+        assertThat(SkyScrapers.solvePuzzle(clues[1])).isEqualTo(outcomes[1]);
     }
 
     @Test
