@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * https://www.codewars.com/kata/5739174624fc28e188000465/train/java
+ * <a href="https://www.codewars.com/kata/5739174624fc28e188000465/train/java">Ranking Poker Hands</a>
  */
 public class PokerHand {
     public enum Result {TIE, WIN, LOSS}
@@ -570,6 +570,28 @@ class Cards {
 
     boolean contains(Value value) {
         return allCards.stream().map(Card::value).anyMatch(v -> v.equals(value));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Cards cards = (Cards) o;
+
+        return allCards.equals(cards.allCards);
+    }
+
+    @Override
+    public int hashCode() {
+        return allCards.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "Cards{" +
+                allCards +
+                '}';
     }
 
     static Cards of(Collection<Card> cards) {
