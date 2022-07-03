@@ -8,6 +8,8 @@ import java.util.List;
  */
 public class RectanglesUnion {
     public static int calculateSpace(int[][] rectangles) {
+        System.out.println(Arrays.stream(rectangles).map(a -> Arrays.stream(a).boxed().toList()).toList());
+
         return Rectangle.of(rectangles)
                 .stream()
                 .map(Rectangle::space)
@@ -18,7 +20,9 @@ public class RectanglesUnion {
 
 interface Rectangle {
     int space();
+
     Rectangle union(Rectangle other);
+
     Rectangle intercept(Rectangle other);
 
     static List<Rectangle> of(int[][] edges) {
@@ -29,24 +33,18 @@ interface Rectangle {
 }
 
 class SimpleRectangle implements Rectangle {
-    private final int width;
-    private final int height;
+    private final Point a;
+    private final Point b;
 
-    private SimpleRectangle(int width, int height) {
-        this.width = width;
-        this.height = height;
+    private SimpleRectangle(Point a, Point b) {
+        this.a = a;
+        this.b = b;
     }
 
-    public static Rectangle of(int[] edges) {
-        final int width = Math.abs(edges[0] - edges[2]);
-        final int height = Math.abs(edges[1] - edges[3]);
-
-        return new SimpleRectangle(width, height);
-    }
 
     @Override
     public int space() {
-        return width * height;
+        return a.width(b) * a.height(b);
     }
 
     @Override
@@ -57,5 +55,22 @@ class SimpleRectangle implements Rectangle {
     @Override
     public Rectangle intercept(Rectangle other) {
         return null;
+    }
+
+    public static Rectangle of(int[] edges) {
+        final Point a = new Point(edges[0], edges[1]);
+        final Point b = new Point(edges[2], edges[3]);
+
+        return new SimpleRectangle(a, b);
+    }
+}
+
+record Point(int x, int y) {
+    int width(Point other) {
+        return Math.abs(x - other.x);
+    }
+
+    int height(Point other) {
+        return Math.abs(y - other.y);
     }
 }
