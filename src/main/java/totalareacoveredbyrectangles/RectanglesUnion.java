@@ -44,6 +44,10 @@ class Cropping implements Area {
         return rectangle.space() - croppingSpace;
     }
 
+    public boolean contains(Rectangle other) {
+        return other.isWithin(rectangle) && croppings.stream().noneMatch(cropping -> cropping.contains(other));
+    }
+
     public Optional<Cropping> crop(Rectangle crop) {
         Optional<Rectangle> maybeCropIntersection = crop.intersection(rectangle);
 
@@ -55,6 +59,10 @@ class Cropping implements Area {
 
         if (cropIntersection.equals(rectangle)) {
             return Optional.empty();
+        }
+
+        if (croppings.stream().anyMatch(other -> other.contains(cropIntersection))) {
+            return Optional.of(this);
         }
 
         Stream<Cropping> newCroppings = Stream.concat(
@@ -159,12 +167,33 @@ class Rectangle implements Area {
         return a.width(b) * a.height(b);
     }
 
-    public Optional<Rectangle> intersection(Rectangle other) {
-        int minX = Math.max(Math.min(a.x(), b.x()), Math.min(other.a.x(), other.b.x()));
-        int minY = Math.max(Math.min(a.y(), b.y()), Math.min(other.a.y(), other.b.y()));
+    public boolean isWithin(Rectangle other) {
+        return minX() >= other.minX() && maxX() <= other.maxX() &&
+                minY() >= other.minY() && maxY() <= other.maxY();
+    }
 
-        int maxX = Math.min(Math.max(a.x(), b.x()), Math.max(other.a.x(), other.b.x()));
-        int maxY = Math.min(Math.max(a.y(), b.y()), Math.max(other.a.y(), other.b.y()));
+    public int minX() {
+        return Math.min(a.x(), b.x());
+    }
+
+    public int maxX() {
+        return Math.max(a.x(), b.x());
+    }
+
+    public int minY() {
+        return Math.min(a.y(), b.y());
+    }
+
+    public int maxY() {
+        return Math.max(a.y(), b.y());
+    }
+
+    public Optional<Rectangle> intersection(Rectangle other) {
+        int minX = Math.max(minX(), other.minX());
+        int minY = Math.max(minY(), other.minY());
+
+        int maxX = Math.min(maxX(), other.maxX());
+        int maxY = Math.min(maxY(), other.maxY());
 
         if (minX >= maxX || minY >= maxY) {
             return Optional.empty();

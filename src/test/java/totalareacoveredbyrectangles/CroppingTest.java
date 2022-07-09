@@ -56,4 +56,15 @@ class CroppingTest {
 
         assertThat(actualCrop.space()).isEqualTo(16 - 3 - 2);
     }
+
+    @Test
+    void shouldCropThreeOverlappingRectangles() throws Exception {
+        Rectangle firstRect = Rectangle.from(new Point(0, 0), new Point(3, 3));
+        Rectangle secondRect = Rectangle.from(new Point(1, 1), new Point(4, 4));
+        Rectangle thirdRect = Rectangle.from(new Point(2, 2), new Point(5, 5));
+
+        Cropping actualCrop = Cropping.of(firstRect).crop(secondRect).get().crop(thirdRect).get();
+
+        assertThat(actualCrop).isEqualTo(Cropping.from(firstRect, List.of(Cropping.of(Rectangle.from(new Point(1, 1), new Point(3, 3))))));
+    }
 }

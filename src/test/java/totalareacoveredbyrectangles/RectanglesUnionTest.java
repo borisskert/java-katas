@@ -3,6 +3,9 @@ package totalareacoveredbyrectangles;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static totalareacoveredbyrectangles.Rectangle.from;
 
@@ -40,5 +43,17 @@ public class RectanglesUnionTest {
         Rectangle rectB = from(new Point(2, 2), new Point(3, 3));
 
         assertThat(rectA.intersection(rectB).isPresent()).isEqualTo(false);
+    }
+
+    @Test
+    public void shouldHugeOverlap() throws Exception {
+        List<int[]> rectangles = new ArrayList<>();
+        for (int i = 0; i < 10000; i++) {
+            int[] rect = new int[]{i, i, i + 1000, i + 1000};
+
+            rectangles.add(rect);
+        }
+
+        assertThat(RectanglesUnion.calculateSpace(rectangles.toArray(new int[][]{}))).isEqualTo(20988001);
     }
 }

@@ -42,4 +42,15 @@ class MergingTest {
 
         assertThat(merged.space()).isEqualTo(18);
     }
+
+    @Test
+    void shouldMergeThreeOverlapping() throws Exception {
+        Rectangle firstRect = Rectangle.from(new Point(0, 0), new Point(3, 3));
+        Rectangle secondRect = Rectangle.from(new Point(1, 1), new Point(4, 4));
+        Rectangle thirdRect = Rectangle.from(new Point(2, 2), new Point(5, 5));
+
+        Merging merged = Merging.of(firstRect).mergeWith(secondRect).mergeWith(thirdRect);
+
+        assertThat(merged.space()).isEqualTo(19);
+    }
 }
