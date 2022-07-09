@@ -116,6 +116,10 @@ class Merging implements Area {
     }
 
     public Merging mergeWith(Rectangle other) {
+        if (merged.stream().anyMatch(cropping -> cropping.contains(other))) {
+            return this;
+        }
+
         Stream<Cropping> cropped = merged.stream()
                 .map(cropping -> cropping.crop(other))
                 .filter(Optional::isPresent)
@@ -144,12 +148,40 @@ class Merging implements Area {
                 .orElse(0);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Merging merging = (Merging) o;
+        return merged.equals(merging.merged);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(merged);
+    }
+
+    @Override
+    public String toString() {
+        return "Merging{" +
+                "merged=" + merged +
+                '}';
+    }
+
     public static Merging of(Rectangle rectangle) {
         return new Merging(List.of(Cropping.of(rectangle)));
     }
 
     public static Merging empty() {
         return new Merging(List.of());
+    }
+
+    public static Merging from(List<Rectangle> rectangles) {
+        List<Cropping> croppings = rectangles.stream()
+                .map(Cropping::of)
+                .toList();
+
+        return new Merging(croppings);
     }
 }
 
