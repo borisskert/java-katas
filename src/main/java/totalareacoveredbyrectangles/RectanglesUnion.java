@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -11,24 +12,16 @@ import java.util.stream.Stream;
  */
 public class RectanglesUnion {
     public static int calculateSpace(int[][] rectangles) {
-        System.out.println(Arrays.stream(rectangles).map(a -> Arrays.stream(a).boxed().toList()).toList());
+//        System.out.println(Arrays.stream(rectangles).map(a -> Arrays.stream(a).boxed().toList()).toList());
 
-        return Area.of(rectangles)
-                .stream()
-                .map(Area::space)
-                .reduce(Integer::sum)
-                .orElse(0);
+        return Merging.empty()
+                .mergeWith(Rectangle.of(rectangles))
+                .space();
     }
 }
 
 interface Area {
     int space();
-
-    static List<Area> of(int[][] edges) {
-        return Arrays.stream(edges)
-                .map(Rectangle::of)
-                .toList();
-    }
 }
 
 class Cropping implements Area {
@@ -65,7 +58,10 @@ class Cropping implements Area {
         }
 
         Stream<Cropping> newCroppings = Stream.concat(
-                croppings.stream().map(cropping -> cropping.crop(cropIntersection)).filter(Optional::isPresent).map(Optional::get),
+                croppings.stream()
+                        .map(cropping -> cropping.crop(cropIntersection))
+                        .filter(Optional::isPresent)
+                        .map(Optional::get),
                 Stream.of(Cropping.of(cropIntersection))
         );
 
@@ -104,6 +100,51 @@ class Cropping implements Area {
     }
 }
 
+class Merging implements Area {
+    private final List<Cropping> merged;
+
+    private Merging(List<Cropping> merged) {
+        this.merged = merged;
+    }
+
+    public Merging mergeWith(Rectangle other) {
+        Stream<Cropping> cropped = merged.stream()
+                .map(cropping -> cropping.crop(other))
+                .filter(Optional::isPresent)
+                .map(Optional::get);
+
+        Stream<Cropping> concat = Stream.concat(cropped, Stream.of(Cropping.of(other)));
+
+        return new Merging(concat.collect(Collectors.toList()));
+    }
+
+    public Merging mergeWith(List<Rectangle> others) {
+        Merging merging = this;
+
+        for (Rectangle other : others) {
+            merging = merging.mergeWith(other);
+        }
+
+        return merging;
+    }
+
+    @Override
+    public int space() {
+        return merged.stream()
+                .map(Area::space)
+                .reduce(Integer::sum)
+                .orElse(0);
+    }
+
+    public static Merging of(Rectangle rectangle) {
+        return new Merging(List.of(Cropping.of(rectangle)));
+    }
+
+    public static Merging empty() {
+        return new Merging(List.of());
+    }
+}
+
 class Rectangle implements Area {
     private final Point a;
     private final Point b;
@@ -112,7 +153,6 @@ class Rectangle implements Area {
         this.a = a;
         this.b = b;
     }
-
 
     @Override
     public int space() {
@@ -158,11 +198,17 @@ class Rectangle implements Area {
         return new Rectangle(a, b);
     }
 
-    public static Area of(int[] edges) {
+    public static Rectangle of(int[] edges) {
         final Point a = new Point(edges[0], edges[1]);
         final Point b = new Point(edges[2], edges[3]);
 
         return new Rectangle(a, b);
+    }
+
+    static List<Rectangle> of(int[][] edges) {
+        return Arrays.stream(edges)
+                .map(Rectangle::of)
+                .toList();
     }
 }
 

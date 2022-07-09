@@ -45,4 +45,15 @@ class CroppingTest {
 
         assertThat(actualCrop).isEqualTo(Optional.empty());
     }
+
+    @Test
+    void shouldCropMoreComplexCropFromAnother() throws Exception {
+        Rectangle originalRect = Rectangle.from(new Point(0, 0), new Point(4, 4));
+        Rectangle cropRectOne = Rectangle.from(new Point(1, 2), new Point(5, 3));
+        Rectangle cropRectTwo = Rectangle.from(new Point(2, 1), new Point(3, 5));
+
+        Cropping actualCrop = Cropping.of(originalRect).crop(cropRectOne).get().crop(cropRectTwo).get();
+
+        assertThat(actualCrop.space()).isEqualTo(16 - 3 - 2);
+    }
 }
