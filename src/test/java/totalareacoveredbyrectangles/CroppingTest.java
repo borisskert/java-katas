@@ -3,8 +3,8 @@ package totalareacoveredbyrectangles;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class CroppingTest {
@@ -14,11 +14,11 @@ class CroppingTest {
         Rectangle originalRect = Rectangle.from(new Point(0, 0), new Point(3, 3));
         Rectangle cropping = Rectangle.from(new Point(2, 2), new Point(4, 4));
 
-        Cropping actualCrop = Cropping.of(originalRect).crop(cropping);
+        Optional<Cropping> actualCrop = Cropping.of(originalRect).crop(cropping);
         Cropping expectedCrop = Cropping.from(originalRect, List.of(Cropping.of(Rectangle.from(new Point(2, 2), new Point(3, 3)))));
 
-        assertThat(actualCrop).isEqualTo(expectedCrop);
-        assertThat(actualCrop.space()).isEqualTo(8);
+        assertThat(actualCrop).isEqualTo(Optional.of(expectedCrop));
+        assertThat(actualCrop.get().space()).isEqualTo(8);
     }
 
     @Test
@@ -29,12 +29,20 @@ class CroppingTest {
                 List.of(Cropping.of(Rectangle.from(new Point(2, 2), new Point(3, 3))))
         );
 
-        Cropping actualCrop = originalCropping.crop(Rectangle.from(new Point(1, 2), new Point(5, 5)));
+        Optional<Cropping> actualCrop = originalCropping.crop(Rectangle.from(new Point(1, 2), new Point(5, 5)));
         Cropping expectedCrop = Cropping.from(originalRect, List.of(Cropping.of(Rectangle.from(new Point(1, 2), new Point(3, 3)))));
 
-        assertThat(actualCrop).isEqualTo(expectedCrop);
-
+        assertThat(actualCrop).isEqualTo(Optional.of(expectedCrop));
+        assertThat(actualCrop.get().space()).isEqualTo(7);
     }
 
+    @Test
+    void shouldDisappearWhenCropEverything() throws Exception {
+        Rectangle originalRect = Rectangle.from(new Point(1, 1), new Point(2, 2));
+        Rectangle largerRect = Rectangle.from(new Point(0, 0), new Point(3, 3));
 
+        Optional<Cropping> actualCrop = Cropping.of(originalRect).crop(largerRect);
+
+        assertThat(actualCrop).isEqualTo(Optional.empty());
+    }
 }

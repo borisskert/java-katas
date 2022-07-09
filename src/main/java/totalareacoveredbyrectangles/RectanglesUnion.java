@@ -51,16 +51,27 @@ class Cropping implements Area {
         return rectangle.space() - croppingSpace;
     }
 
-    public Cropping crop(Rectangle crop) {
+    public Optional<Cropping> crop(Rectangle crop) {
         Optional<Rectangle> maybeCropIntersection = crop.intersection(rectangle);
 
-        Stream<Cropping> newCroppings = maybeCropIntersection.map(
-                cropIntersection -> Stream.concat(
-                        croppings.stream().map(cropping -> cropping.crop(cropIntersection)),
-                        Stream.of(Cropping.of(cropIntersection))
-                )).orElseGet(croppings::stream);
+        if (maybeCropIntersection.isEmpty()) {
+            return Optional.of(this);
+        }
 
-        return new Cropping(rectangle, newCroppings.toList());
+        Rectangle cropIntersection = maybeCropIntersection.get();
+
+        if (cropIntersection.equals(rectangle)) {
+            return Optional.empty();
+        }
+
+        Stream<Cropping> newCroppings = Stream.concat(
+                croppings.stream().map(cropping -> cropping.crop(cropIntersection)).filter(Optional::isPresent).map(Optional::get),
+                Stream.of(Cropping.of(cropIntersection))
+        );
+
+        Cropping cropping = new Cropping(rectangle, newCroppings.toList());
+
+        return Optional.of(cropping);
     }
 
     @Override
