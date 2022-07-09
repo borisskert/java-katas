@@ -34,9 +34,9 @@ interface Area {
 class Cropping implements Area {
 
     private final Rectangle rectangle;
-    private final List<Area> croppings;
+    private final List<Cropping> croppings;
 
-    private Cropping(Rectangle rectangle, List<Area> croppings) {
+    private Cropping(Rectangle rectangle, List<Cropping> croppings) {
         this.rectangle = rectangle;
         this.croppings = croppings;
     }
@@ -52,23 +52,44 @@ class Cropping implements Area {
     }
 
     public Cropping crop(Rectangle crop) {
-//        Rectangle intersectionCrop = (Rectangle) crop.intersection(rectangle);
-        Rectangle intersectionCrop = crop;
+        Optional<Rectangle> maybeCropIntersection = crop.intersection(rectangle);
 
-        List<Area> extendedCroppings = Stream.concat(
-                croppings.stream()
-//                        .map(area -> area.intersectionWith(intersectionCrop))
-                        ,
-                Stream.of(intersectionCrop)
-        ).toList();
+        Stream<Cropping> newCroppings = maybeCropIntersection.map(
+                cropIntersection -> Stream.concat(
+                        croppings.stream().map(cropping -> cropping.crop(cropIntersection)),
+                        Stream.of(Cropping.of(cropIntersection))
+                )).orElseGet(croppings::stream);
 
-        // TODO make intersections
+        return new Cropping(rectangle, newCroppings.toList());
+    }
 
-        return new Cropping(rectangle, extendedCroppings);
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Cropping cropping = (Cropping) o;
+        return rectangle.equals(cropping.rectangle) && croppings.equals(cropping.croppings);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(rectangle, croppings);
+    }
+
+    @Override
+    public String toString() {
+        return "Cropping{" +
+                "rectangle=" + rectangle +
+                ", croppings=" + croppings +
+                '}';
     }
 
     public static Cropping of(Rectangle rectangle) {
         return new Cropping(rectangle, List.of());
+    }
+
+    public static Cropping from(Rectangle rectangle, List<Cropping> croppings) {
+        return new Cropping(rectangle, croppings);
     }
 }
 
@@ -94,7 +115,7 @@ class Rectangle implements Area {
         int maxX = Math.min(Math.max(a.x(), b.x()), Math.max(other.a.x(), other.b.x()));
         int maxY = Math.min(Math.max(a.y(), b.y()), Math.max(other.a.y(), other.b.y()));
 
-        if(minX >= maxX || minY >= maxY) {
+        if (minX >= maxX || minY >= maxY) {
             return Optional.empty();
         }
 
@@ -112,6 +133,14 @@ class Rectangle implements Area {
     @Override
     public int hashCode() {
         return Objects.hash(a, b);
+    }
+
+    @Override
+    public String toString() {
+        return "Rectangle{" +
+                "a=" + a +
+                ", b=" + b +
+                '}';
     }
 
     public static Rectangle from(Point a, Point b) {
