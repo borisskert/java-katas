@@ -47,13 +47,15 @@ public class RectanglesUnionTest {
 
     @Test
     public void shouldHugeOverlap() throws Exception {
-        List<int[]> rectangles = new ArrayList<>();
-        for (int i = 0; i < 10000; i++) {
-            int[] rect = new int[]{i, i, i + 1000, i + 1000};
+        for (int x = 0; x < 10; x++) {
+            List<int[]> rectangles = new ArrayList<>();
+            for (int i = 0; i < 10000; i++) {
+                int[] rect = new int[]{i, i, i + 1000, i + 1000};
 
-            rectangles.add(rect);
+                rectangles.add(rect);
+            }
+
+            assertThat(RectanglesUnion.calculateSpace(rectangles.toArray(new int[][]{}))).isEqualTo(20988001);
         }
-
-        assertThat(RectanglesUnion.calculateSpace(rectangles.toArray(new int[][]{}))).isEqualTo(20988001);
     }
 }

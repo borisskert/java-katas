@@ -1,9 +1,8 @@
 package totalareacoveredbyrectangles;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -27,9 +26,9 @@ interface Area {
 class Cropping implements Area {
 
     private final Rectangle rectangle;
-    private final List<Cropping> croppings;
+    private final Collection<Cropping> croppings;
 
-    private Cropping(Rectangle rectangle, List<Cropping> croppings) {
+    private Cropping(Rectangle rectangle, Collection<Cropping> croppings) {
         this.rectangle = rectangle;
         this.croppings = croppings;
     }
@@ -37,6 +36,7 @@ class Cropping implements Area {
     @Override
     public int space() {
         Integer croppingSpace = croppings.stream()
+                .parallel()
                 .map(Area::space)
                 .reduce(Integer::sum)
                 .orElse(0);
@@ -45,7 +45,8 @@ class Cropping implements Area {
     }
 
     public boolean contains(Rectangle other) {
-        return other.isWithin(rectangle) && croppings.stream().noneMatch(cropping -> cropping.contains(other));
+        return other.isWithin(rectangle) && croppings.stream()
+                .noneMatch(cropping -> cropping.contains(other));
     }
 
     public Optional<Cropping> crop(Rectangle crop) {
@@ -67,13 +68,18 @@ class Cropping implements Area {
 
         Stream<Cropping> newCroppings = Stream.concat(
                 croppings.stream()
+                        .parallel()
                         .map(cropping -> cropping.crop(cropIntersection))
                         .filter(Optional::isPresent)
-                        .map(Optional::get),
+                        .map(Optional::get)
+                ,
                 Stream.of(Cropping.of(cropIntersection))
         );
 
-        Cropping cropping = new Cropping(rectangle, newCroppings.toList());
+        Cropping cropping = new Cropping(
+                rectangle,
+                newCroppings.toList()
+        );
 
         return Optional.of(cropping);
     }
@@ -103,15 +109,15 @@ class Cropping implements Area {
         return new Cropping(rectangle, List.of());
     }
 
-    public static Cropping from(Rectangle rectangle, List<Cropping> croppings) {
+    public static Cropping from(Rectangle rectangle, Collection<Cropping> croppings) {
         return new Cropping(rectangle, croppings);
     }
 }
 
 class Merging implements Area {
-    private final List<Cropping> merged;
+    private final Collection<Cropping> merged;
 
-    private Merging(List<Cropping> merged) {
+    private Merging(Collection<Cropping> merged) {
         this.merged = merged;
     }
 
@@ -121,31 +127,45 @@ class Merging implements Area {
         }
 
         Stream<Cropping> cropped = merged.stream()
+                .parallel()
                 .map(cropping -> cropping.crop(other))
                 .filter(Optional::isPresent)
                 .map(Optional::get);
 
         Stream<Cropping> concat = Stream.concat(cropped, Stream.of(Cropping.of(other)));
 
-        return new Merging(concat.collect(Collectors.toList()));
+        return new Merging(concat.toList());
     }
 
-    public Merging mergeWith(List<Rectangle> others) {
-        Merging merging = this;
-
-        for (Rectangle other : others) {
-            merging = merging.mergeWith(other);
-        }
-
-        return merging;
+    public Merging mergeWith(Collection<Rectangle> others) {
+        return others.stream()
+                .parallel()
+                .reduce(
+                        this,
+                        Merging::mergeWith,
+                        Merging::merge
+                );
     }
 
     @Override
     public int space() {
         return merged.stream()
+                .parallel()
                 .map(Area::space)
                 .reduce(Integer::sum)
                 .orElse(0);
+    }
+
+    public Merging merge(Merging other) {
+        return other.merged.stream()
+                .reduce(
+                        this,
+                        Merging::mergeWith,
+                        Merging::merge);
+    }
+
+    private Merging mergeWith(Cropping cropping) {
+        throw new RuntimeException("Not yet implemented");
     }
 
     @Override
@@ -176,8 +196,8 @@ class Merging implements Area {
         return new Merging(List.of());
     }
 
-    public static Merging from(List<Rectangle> rectangles) {
-        List<Cropping> croppings = rectangles.stream()
+    public static Merging from(Collection<Rectangle> rectangles) {
+        Collection<Cropping> croppings = rectangles.stream()
                 .map(Cropping::of)
                 .toList();
 
@@ -189,9 +209,18 @@ class Rectangle implements Area {
     private final Point a;
     private final Point b;
 
+    private final int minX;
+    private final int minY;
+    private final int maxX;
+    private final int maxY;
+
     private Rectangle(Point a, Point b) {
         this.a = a;
         this.b = b;
+        this.minX = Math.min(a.x(), b.x());
+        this.minY = Math.min(a.y(), b.y());
+        this.maxX = Math.max(a.x(), b.x());
+        this.maxY = Math.max(a.y(), b.y());
     }
 
     @Override
@@ -205,19 +234,19 @@ class Rectangle implements Area {
     }
 
     public int minX() {
-        return Math.min(a.x(), b.x());
+        return minX;
     }
 
     public int maxX() {
-        return Math.max(a.x(), b.x());
+        return maxX;
     }
 
     public int minY() {
-        return Math.min(a.y(), b.y());
+        return minY;
     }
 
     public int maxY() {
-        return Math.max(a.y(), b.y());
+        return maxY;
     }
 
     public Optional<Rectangle> intersection(Rectangle other) {
@@ -266,9 +295,11 @@ class Rectangle implements Area {
         return new Rectangle(a, b);
     }
 
-    static List<Rectangle> of(int[][] edges) {
+    static Collection<Rectangle> of(int[][] edges) {
         return Arrays.stream(edges)
+                .parallel()
                 .map(Rectangle::of)
+                .distinct()
                 .toList();
     }
 }
